@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>J.A.R.V.I.S. — Silent Protocol AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cyan: #00d4ff;
+  --cyan2: #00aacc;
+  --gold: #ffd700;
+  --red: #ff2244;
+  --green: #00ff88;
+  --dark: #000810;
+  --mid: #001525;
+}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html, body { height:100%; }
+body {
+  background: var(--dark);
+  color: var(--cyan);
+  font-family: 'Rajdhani', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  cursor: crosshair;
+}
+body::before {
+  content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
+  background-image:
+    linear-gradient(rgba(0,212,255,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,212,255,0.04) 1px, transparent 1px);
+  background-size:50px 50px;
+}
+body::after {
+  content:''; position:fixed; inset:0; z-index:1; pointer-events:none;
+  background: repeating-linear-gradient(
+    0deg, transparent, transparent 2px,
+    rgba(0,0,0,0.07) 2px, rgba(0,0,0,0.07) 4px
+  );
+}
+.wrap {
+  position:relative; z-index:2;
+  max-width:860px; margin:0 auto;
+  padding:20px 14px 80px;
+}
+.hdr { text-align:center; padding:24px 0 16px; }
+.reactor {
+  width:76px; height:76px; margin:0 auto 14px;
+  position:relative; display:flex; align-items:center; justify-content:center;
+}
+.reactor-svg {
+  position:absolute; inset:0; width:100%; height:100%;
+  animation:spin 5s linear infinite;
+  filter:drop-shadow(0 0 10px var(--cyan)) drop-shadow(0 0 22px var(--cyan));
+}
+@keyframes spin { to{transform:rotate(360deg)} }
+.reactor-core {
+  width:28px; height:28px; border-radius:50%;
+  background:radial-gradient(circle, #fff 0%, var(--cyan) 50%, transparent 80%);
+  box-shadow:0 0 16px var(--cyan), 0 0 32px var(--cyan);
+  animation:corePulse 2s ease-in-out infinite;
+}
+@keyframes corePulse { 0%,100%{transform:scale(1);opacity:.85} 50%{transform:scale(1.15);opacity:1} }
+.title {
+  font-family:'Orbitron'; font-weight:900;
+  font-size:clamp(22px,6vw,40px);
+  letter-spacing:.35em;
+  background:linear-gradient(120deg, var(--cyan), #fff 50%, var(--gold));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.subtitle {
+  font-family:'Share Tech Mono'; font-size:10px;
+  color:rgba(0,212,255,.45); letter-spacing:.45em; margin-top:5px;
+}
+.status-row {
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  margin-top:10px; font-family:'Share Tech Mono'; font-size:10px;
+  color:rgba(0,212,255,.4);
+}
+.sdot {
+  width:6px; height:6px; border-radius:50%;
+  background:var(--green); box-shadow:0 0 8px var(--green);
+  animation:blink 1.4s ease-in-out infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.15} }
+.stats {
+  display:grid; grid-template-columns:repeat(4,1fr); gap:8px;
+  margin:18px 0;
+}
+.stat {
+  border:1px solid rgba(0,212,255,.15);
+  border-radius:5px; padding:9px 6px; text-align:center;
+  background:linear-gradient(135deg,rgba(0,212,255,.05),transparent);
+  position:relative; overflow:hidden;
+}
+.stat::after {
+  content:''; position:absolute; top:0; left:0; right:0; height:1px;
+  background:linear-gradient(90deg,transparent,var(--cyan),transparent);
+}
+.sv { font-family:'Orbitron'; font-size:17px; font-weight:700; color:var(--cyan); }
+.sl { font-size:8px; color:rgba(0,212,255,.35); letter-spacing:.18em; margin-top:2px; }
+.voice-wrap {
+  display:flex; flex-direction:column; align-items:center; margin:18px 0 10px;
+}
+.rings-wrap {
+  position:relative; width:130px; height:130px;
+  display:flex; align-items:center; justify-content:center;
+}
+.ring {
+  position:absolute; border-radius:50%;
+  border:1px solid rgba(0,212,255,.25);
+  animation:ringOut 2.4s ease-out infinite;
+}
+.ring:nth-child(1){ width:130px;height:130px; animation-delay:0s; }
+.ring:nth-child(2){ width:130px;height:130px; animation-delay:.7s; }
+.ring:nth-child(3){ width:130px;height:130px; animation-delay:1.4s; }
+@keyframes ringOut {
+  0%{transform:scale(.6);opacity:.7}
+  100%{transform:scale(1.4);opacity:0}
+}
+.vbtn {
+  width:84px; height:84px; border-radius:50%;
+  border:2px solid var(--cyan);
+  background:radial-gradient(circle,rgba(0,212,255,.12),rgba(0,8,16,.95));
+  cursor:pointer; z-index:2; position:relative;
+  box-shadow:0 0 18px rgba(0,212,255,.35), inset 0 0 18px rgba(0,212,255,.06);
+  transition:all .25s; display:flex; align-items:center; justify-content:center;
+  -webkit-tap-highlight-color:transparent;
+}
+.vbtn:hover { box-shadow:0 0 36px rgba(0,212,255,.6),inset 0 0 28px rgba(0,212,255,.12); transform:scale(1.06); }
+.vbtn.on {
+  border-color:var(--red);
+  box-shadow:0 0 36px rgba(255,34,68,.6), inset 0 0 28px rgba(255,34,68,.1);
+  animation:vPulse .9s ease-in-out infinite;
+}
+@keyframes vPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.09)} }
+.vbtn svg { width:34px; height:34px; color:var(--cyan); pointer-events:none; }
+.vbtn.on svg { color:var(--red); }
+.vlabel {
+  margin-top:11px; font-family:'Share Tech Mono'; font-size:10px;
+  color:rgba(0,212,255,.45); letter-spacing:.3em; text-align:center;
+}
+.wave {
+  display:flex; align-items:center; gap:3px;
+  height:28px; margin-top:8px;
+  visibility:hidden; opacity:0; transition:opacity .3s;
+}
+.wave.show { visibility:visible; opacity:1; }
+.wb {
+  width:3px; background:var(--cyan); border-radius:2px;
+  animation:wv .7s ease-in-out infinite;
+}
+.wb:nth-child(2n){animation-delay:.12s;}
+.wb:nth-child(3n){animation-delay:.22s;}
+.wb:nth-child(5n){animation-delay:.06s;}
+@keyframes wv { 0%,100%{height:3px;opacity:.25} 50%{height:22px;opacity:1} }
+.live-box {
+  width:100%; max-width:400px;
+  background:rgba(0,212,255,.03); border:1px solid rgba(0,212,255,.12);
+  border-radius:5px; padding:9px 13px; margin-top:8px;
+  font-family:'Share Tech Mono'; font-size:12px;
+  color:rgba(0,212,255,.75); min-height:32px;
+  display:none;
+}
+.live-box.show { display:block; }
+.chat {
+  background:linear-gradient(180deg,rgba(0,21,37,.65),rgba(0,8,16,.85));
+  border:1px solid rgba(0,212,255,.13);
+  border-radius:8px; padding:16px;
+  min-height:260px; max-height:400px;
+  overflow-y:auto; margin:14px 0;
+  position:relative;
+  scrollbar-width:thin; scrollbar-color:rgba(0,212,255,.25) transparent;
+}
+.chat::before {
+  content:''; position:absolute; top:0;left:0;right:0; height:2px;
+  background:linear-gradient(90deg,transparent,var(--cyan),var(--gold),transparent);
+}
+.chat::-webkit-scrollbar { width:3px; }
+.chat::-webkit-scrollbar-thumb { background:rgba(0,212,255,.25); border-radius:2px; }
+.msg { margin-bottom:14px; animation:msgIn .35s ease-out both; }
+@keyframes msgIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+.mlabel { font-family:'Share Tech Mono'; font-size:8px; letter-spacing:.3em; margin-bottom:4px; color:rgba(0,212,255,.3); }
+.msg-u .mlabel { color:rgba(255,215,0,.3); text-align:right; }
+.msg-u { text-align:right; }
+.bubble {
+  display:inline-block; max-width:88%;
+  border-radius:10px 10px 10px 0; padding:10px 14px;
+  font-size:14px; line-height:1.6;
+  background:linear-gradient(135deg,rgba(0,212,255,.07),rgba(0,212,255,.02));
+  border:1px solid rgba(0,212,255,.18); color:rgba(210,245,255,.9);
+  text-align:left;
+}
+.msg-u .bubble {
+  border-radius:10px 10px 0 10px;
+  background:linear-gradient(135deg,rgba(255,215,0,.09),rgba(255,215,0,.03));
+  border-color:rgba(255,215,0,.2); color:#e0c870;
+}
+.thinking { display:inline-flex; gap:5px; padding:12px 16px; }
+.td { width:7px;height:7px;border-radius:50%;background:var(--cyan);
+  animation:td .9s ease-in-out infinite; }
+.td:nth-child(2){animation-delay:.15s;} .td:nth-child(3){animation-delay:.3s;}
+@keyframes td { 0%,100%{transform:scale(.4);opacity:.25} 50%{transform:scale(1);opacity:1} }
+.inp-row { display:flex; gap:8px; margin-top:10px; }
+.inp {
+  flex:1; background:rgba(0,212,255,.04);
+  border:1px solid rgba(0,212,255,.2); border-radius:6px;
+  padding:11px 14px; color:var(--cyan);
+  font-family:'Rajdhani'; font-size:15px; outline:none;
+  transition:border-color .25s;
+}
+.inp::placeholder { color:rgba(0,212,255,.22); }
+.inp:focus { border-color:rgba(0,212,255,.5); }
+.sbtn {
+  background:linear-gradient(135deg,rgba(0,212,255,.15),rgba(0,212,255,.05));
+  border:1px solid rgba(0,212,255,.3); border-radius:6px;
+  padding:11px 18px; color:var(--cyan);
+  font-family:'Orbitron'; font-size:10px; letter-spacing:.1em;
+  cursor:pointer; transition:all .25s; white-space:nowrap;
+}
+.sbtn:hover { background:rgba(0,212,255,.22); box-shadow:0 0 18px rgba(0,212,255,.3); }
+.sbtn:active { transform:scale(.97); }
+.sec-title {
+  font-family:'Orbitron'; font-size:10px; letter-spacing:.3em;
+  color:rgba(0,212,255,.35); margin:22px 0 10px;
+  display:flex; align-items:center; gap:10px;
+}
+.sec-title::after { content:''; flex:1; height:1px; background:linear-gradient(90deg,rgba(0,212,255,.18),transparent); }
+.cmds {
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:7px;
+}
+@media(min-width:480px){ .cmds{grid-template-columns:repeat(3,1fr);} }
+@media(min-width:680px){ .cmds{grid-template-columns:repeat(4,1fr);} }
+.cb {
+  background:linear-gradient(135deg,rgba(0,212,255,.05),transparent);
+  border:1px solid rgba(0,212,255,.13); border-radius:7px;
+  padding:11px 8px; cursor:pointer;
+  text-align:center; transition:all .2s;
+  position:relative; overflow:hidden;
+  -webkit-tap-highlight-color:transparent;
+}
+.cb::before {
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(135deg,rgba(0,212,255,.12),transparent);
+  opacity:0; transition:opacity .2s;
+}
+.cb:hover { border-color:rgba(0,212,255,.4); }
+.cb:hover::before { opacity:1; }
+.cb:active { transform:scale(.96); }
+.ci { font-size:22px; display:block; margin-bottom:3px; pointer-events:none; }
+.cn {
+  font-size:10px; letter-spacing:.07em;
+  color:rgba(0,212,255,.65); pointer-events:none;
+  font-weight:600;
+}
+.notice {
+  background:rgba(255,215,0,.04); border:1px solid rgba(255,215,0,.14);
+  border-radius:7px; padding:13px 15px; margin:16px 0;
+  font-size:13px; color:rgba(255,215,0,.65); line-height:1.65;
+}
+.notice b { color:var(--gold); }
+.alert {
+  background:rgba(255,34,68,.07); border:1px solid rgba(255,34,68,.3);
+  border-radius:7px; padding:12px 15px; margin-top:10px;
+  font-size:13px; color:rgba(255,120,140,.9);
+  display:none; animation:msgIn .3s ease-out;
+}
+.alert.show { display:block; }
+.alert-t { font-family:'Orbitron'; font-size:9px; letter-spacing:.2em; margin-bottom:4px; color:var(--red); }
+.cnr { position:fixed; width:36px;height:36px; pointer-events:none; z-index:10; }
+.cnr::before,.cnr::after { content:''; position:absolute; background:rgba(0,212,255,.6); }
+.cnr::before{width:100%;height:1px;top:0;left:0;}
+.cnr::after{width:1px;height:100%;top:0;left:0;}
+.cnr.tl{top:10px;left:10px;}
+.cnr.tr{top:10px;right:10px;transform:scaleX(-1);}
+.cnr.bl{bottom:10px;left:10px;transform:scaleY(-1);}
+.cnr.br{bottom:10px;right:10px;transform:scale(-1);}
+.bbar {
+  position:fixed; bottom:0;left:0;right:0; z-index:20;
+  background:linear-gradient(transparent,rgba(0,8,16,.97));
+  padding:10px 18px;
+  display:flex; justify-content:space-between; align-items:center;
+}
+.binfo { font-family:'Share Tech Mono'; font-size:9px; color:rgba(0,212,255,.28); }
+.pbars { display:flex; gap:3px; align-items:center; }
+.pb { width:4px;height:13px;border-radius:2px; background:rgba(0,212,255,.1); transition:background .4s; }
+.pb.on { background:var(--cyan); box-shadow:0 0 5px var(--cyan); }
+.mic-banner {
+  background:rgba(255,215,0,.06); border:1px solid rgba(255,215,0,.2);
+  border-radius:6px; padding:10px 14px; margin-bottom:10px;
+  font-size:12px; color:rgba(255,215,0,.75);
+  font-family:'Share Tech Mono'; display:none;
+}
+.mic-banner.show { display:block; }
+</style>
+</head>
+<body>
+
+<div class="cnr tl"></div>
+<div class="cnr tr"></div>
+<div class="cnr bl"></div>
+<div class="cnr br"></div>
+
+<div class="wrap">
+  <div class="hdr">
+    <div class="reactor">
+      <svg class="reactor-svg" viewBox="0 0 100 100" fill="none">
+        <circle cx="50" cy="50" r="46" stroke="rgba(0,212,255,.25)" stroke-width="1"/>
+        <circle cx="50" cy="50" r="36" stroke="rgba(0,212,255,.45)" stroke-width="1" stroke-dasharray="6 3"/>
+        <polygon points="50,8 59,37 90,37 65,55 74,85 50,68 26,85 35,55 10,37 41,37"
+          fill="none" stroke="rgba(0,212,255,.65)" stroke-width="1.5"/>
+        <circle cx="50" cy="50" r="9" fill="rgba(0,212,255,.15)" stroke="rgba(0,212,255,.8)" stroke-width="1.5"/>
+      </svg>
+      <div class="reactor-core"></div>
+    </div>
+    <div class="title">J.A.R.V.I.S.</div>
+    <div class="subtitle">JUST A RATHER VERY INTELLIGENT SYSTEM</div>
+    <div class="status-row">
+      <span class="sdot"></span>
+      <span id="statusTxt">INICIALIZANDO PROTOCOLOS...</span>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="sv">∞</div><div class="sl">PODER</div></div>
+    <div class="stat"><div class="sv" id="sCount">0</div><div class="sl">COMANDOS</div></div>
+    <div class="stat"><div class="sv" id="sClock">--:--</div><div class="sl">HORÁRIO</div></div>
+    <div class="stat"><div class="sv" id="sMode">VOZ</div><div class="sl">MODO</div></div>
+  </div>
+
+  <div class="mic-banner" id="micBanner">
+    ⚠ Permissão de microfone negada. Vá em Configurações do navegador → Privacidade → Microfone e permita este site.
+  </div>
+
+  <div class="voice-wrap">
+    <div class="rings-wrap">
+      <div class="ring"></div>
+      <div class="ring"></div>
+      <div class="ring"></div>
+      <button class="vbtn" id="vbtn" onclick="toggleVoice()" aria-label="Ativar reconhecimento de voz">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="1" width="6" height="11" rx="3" fill="rgba(0,212,255,.15)"/>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+          <line x1="12" y1="19" x2="12" y2="23"/>
+          <line x1="8" y1="23" x2="16" y2="23"/>
+        </svg>
+      </button>
+    </div>
+    <div class="vlabel" id="vlabel">OUVINDO...</div>
+    <div class="wave show" id="wave">
+      <div class="wb"></div><div class="wb"></div><div class="wb"></div>
+      <div class="wb"></div><div class="wb"></div><div class="wb"></div>
+      <div class="wb"></div><div class="wb"></div><div class="wb"></div>
+      <div class="wb"></div>
+    </div>
+    <div class="live-box show" id="liveBox">Aguardando sua voz...</div>
+  </div>
+
+  <div class="chat" id="chat">
+    <div class="msg msg-j">
+      <div class="mlabel">J.A.R.V.I.S.</div>
+      <div class="bubble">
+        Sistemas online, Senhor. Arc Reactor calibrado. Todos os protocolos de segurança ativos.<br><br>
+        Microfone ativado automaticamente. Pode falar agora — ou digitar seu comando abaixo.
+      </div>
+    </div>
+  </div>
+
+  <div class="inp-row">
+    <input class="inp" id="inp" placeholder="Digite seu comando, Senhor..." autocomplete="off"
+      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg();}">
+    <button class="sbtn" onclick="sendMsg()">ENVIAR</button>
+  </div>
+
+  <div class="sec-title">COMANDOS RÁPIDOS</div>
+  <div class="cmds" id="cmds">
+    <div class="cb" onclick="triggerCommand('CLIMA', 'Estratégia diária de clima: como sintonizar a previsão local à rotina orgânica de Stories para humanização da marca.')">
+      <span class="ci">🌦️</span><span class="cn">CLIMA</span>
+    </div>
+    <div class="cb" onclick="triggerCommand('NOTÍCIAS', 'Radar de acontecimentos: como transformar notícias quentes do momento em ganchos orgânicos de atração no Instagram.')">
+      <span class="ci">📡</span><span class="cn">NOTÍCIAS</span>
+    </div>
+    <div class="cb" onclick="triggerCommand('REELS', 'Roteiro completo de Reels viral focado em retenção profunda (estética dark), com gancho de 3 segundos, áudio tendência e CTA orgânica para Direct.')">
+      <span class="ci">🎬</span><span class="cn">REELS</span>
+    </div>
+    <div class="cb" onclick="triggerCommand('ESTRATÉGIA', 'Plano de ação acelerado para tráfego orgânico de 30 dias com foco em estruturação de atração e conversão diária de leads.')">
+      <span class="ci">📊</span><span class="cn">ESTRATÉGIA</span>
+    </div>
+    <div class="cb" onclick="triggerCommand('COPY', 'Copy de vendas persuasiva para direct ou post carrossel orgânico, explorando dores ocultas, storytelling e quebra rápida de objeções.')">
+      <span class="ci">✍️</span><span class="cn">COPY</span>
+    </div>
+    <div class="cb" onclick="triggerCommand('CONTEÚDO', 'Geração de 10 ideias de conteúdo estritamente orgânico focados em viralização rápida, salvamentos e compartilhamentos inteligentes no nicho.')">
+      <span class="ci">💡</span><span class="cn">CONTEÚDO</span>
+    </div>
+    <div class="cb" onclick="triggerCommand('ROI ORGÂNICO', 'Análise de métricas orgânicas em 30 dias: taxa de conversão do link da bio, volume de direct, visualizações de Reels e taxas de retenção plausíveis.')">
+      <span class="ci">💰</span><span class="cn">ROI ORGÂNICO</span>
+    </div>
+    <div class="cb" onclick="triggerCommand('INSTAGRAM', 'Criação de 5 legendas magnéticas, com forte apelo emocional, focando em gerar conexão, salvamentos rápidos e comentários de automação.')">
+      <span class="ci">📱</span><span class="cn">INSTAGRAM</span>
+    </div>
+    <div class="cb" onclick="triggerCommand('TENDÊNCIAS', 'Análise de tendências orgânicas de mercado adotadas por grandes referências para escalada de visualizações sem investimento financeiro.')">
+      <span class="ci">🔍</span><span class="cn">TENDÊNCIAS</span>
+    </div>
+    <div class="cb" onclick="triggerCommand('E-MAIL', 'Roteiro de e-mail de nutrição ou automação ManyChat estruturada para fechar leads frios no orgânico de forma automatizada.')">
+      <span class="ci">📧</span><span class="cn">E-MAIL</span>
+    </div>
+    <div class="cb" onclick="triggerCommand('PSICOLOGIA', 'Análise comportamental do público-alvo no orgânico: o que motiva o clique, a interação nos Stories e a tomada de decisão em 30 dias.')">
+      <span class="ci">🧠</span><span class="cn">PSICOLOGIA</span>
+    </div>
+    <div class="cb" onclick="triggerCommand('LANDING PAGE', 'Estruturação tática e copy focada em alta conversão de tráfego orgânico (visitas na página oriundas da bio/direct) para maximizar vendas de baixo ticket.')">
+      <span class="ci">⚡</span><span class="cn">LANDING PAGE</span>
+    </div>
+    <div class="cb" onclick="triggerCommand('CRIATIVO ORG', 'Roteiro e roteirização de vídeo dinâmico focado em atração orgânica para retenção máxima nos primeiros 3 segundos, simulando estrutura de anúncios de alta conversão sem investimento pago.')">
+      <span class="ci">🎯</span><span class="cn">CRIATIVO ORG</span>
+    </div>
+    <div class="cb" onclick="triggerCommand('FRASES DARK', 'Criação de 5 frases de impacto filosófico ou psicológico em estilo dark para posts virais rápidos voltados a salvar no Instagram.')">
+      <span class="ci">🌑</span><span class="cn">FRASES DARK</span>
+    </div>
+    <div class="cb" onclick="triggerCommand('PLANO 7 DIAS', 'Cronograma semanal tático de postagens orgânicas para atração de novos seguidores qualificados e conversão direta via direct.')">
+      <span class="ci">📅</span><span class="cn">PLANO 7 DIAS</span>
+    </div>
+    <div class="cb" onclick="triggerCommand('FUNIL ORGÂNICO', 'Estrutura passo a passo do Funil Orgânico de 30 dias (Reels -> Stories -> ManyChat Direct -> Checkout Kiwify) com soluções para gargalos de visualização.')">
+      <span class="ci">🔧</span><span class="cn">FUNIL ORGÂNICO</span>
+    </div>
+  </div>
+
+  <div class="notice">
+    <b>🎙️ VOZ:</b> Microfone ativado automaticamente — basta falar. O sistema reconhece e processa em português.<br>
+    <b>⌨️ TEXTO:</b> Digite na caixa abaixo e pressione Enter ou clique ENVIAR.
+  </div>
+
+  <div class="alert" id="alertBox">
+    <div class="alert-t">⚠ ALERTA DO SISTEMA</div>
+    <div id="alertMsg"></div>
+  </div>
+</div>
+
+<div class="bbar">
+  <div class="binfo">SILENT PROTOCOL // ARC REACTOR v4.2 // <span id="bdate"></span></div>
+  <div class="pbars">
+    <div class="pb on"></div><div class="pb on"></div><div class="pb on"></div>
+    <div class="pb on"></div><div class="pb"></div>
+  </div>
+</div>
+
+<script>
+// ── CLOCK ──
+function tick(){
+  const now = new Date();
+  document.getElementById('sClock').textContent =
+    now.getHours().toString().padStart(2,'0')+':'+
+    now.getMinutes().toString().padStart(2,'0');
+  document.getElementById('bdate').textContent =
+    now.toLocaleDateString('pt-BR');
+}
+tick(); setInterval(tick,1000);
+
+// ── STATUS ──
+const statusMsgs = [
+  'PROTOCOLOS ATIVOS — PRONTO',
+  'MICROFONE ONLINE — OUVINDO',
+  'ARC REACTOR 100%',
+  'CONEXÃO NATIVA OK',
+  'AGUARDANDO COMANDOS'
+];
+let si=0;
+setTimeout(()=>{
+  document.getElementById('statusTxt').textContent = statusMsgs[0];
+  setInterval(()=>{
+    si=(si+1)%statusMsgs.length;
+    document.getElementById('statusTxt').textContent = statusMsgs[si];
+  },4000);
+},1500);
+
+// ── CHAT ──
+let cmdCount=0;
+const chat = document.getElementById('chat');
+
+function formatText(text) {
+  return text
+    .replace(/\n/g, '<br>')
+    .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+    .replace(/\*(.*?)\*/g, '<i>$1</i>');
+}
+
+function addMsg(role, text){
+  const d = document.createElement('div');
+  d.className = 'msg msg-'+(role==='user'?'u':'j');
+  d.innerHTML = `<div class="mlabel">${role==='user'?'SENHOR':'J.A.R.V.I.S.'}</div>
+    <div class="bubble">${formatText(text)}</div>`;
+  chat.appendChild(d);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function addThinking(){
+  const d = document.createElement('div');
+  d.className = 'msg msg-j'; d.id = 'thinking';
+  d.innerHTML = `<div class="mlabel">J.A.R.V.I.S.</div>
+    <div class="bubble thinking"><div class="td"></div><div class="td"></div><div class="td"></div></div>`;
+  chat.appendChild(d);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function removeThinking(){
+  const t = document.getElementById('thinking');
+  if(t) t.remove();
+}
+
+function showAlert(msg){
+  document.getElementById('alertMsg').textContent = msg;
+  document.getElementById('alertBox').classList.add('show');
+  setTimeout(()=>document.getElementById('alertBox').classList.remove('show'), 5000);
+}
+
+// ── UNLOCK AUDIO (CHROME TTS RESTRITION) ──
+let ttsUnlocked = false;
+function unlockTTS() {
+  if (ttsUnlocked) return;
+  if ('speechSynthesis' in window) {
+    try {
+      const u = new SpeechSynthesisUtterance('');
+      window.speechSynthesis.speak(u);
+      ttsUnlocked = true;
+    } catch (e) {
+      console.warn("Falha ao inicializar o desbloqueador de áudio:", e);
+    }
+  }
+}
+document.addEventListener('click', unlockTTS, { once: true });
+document.addEventListener('touchstart', unlockTTS, { once: true });
+
+// ── LOCAL OFFLINE FALLBACK ENGINE ──
+async function mockJarvisResponse(userText) {
+  await new Promise(resolve => setTimeout(resolve, 800));
+  const text = userText.toLowerCase();
+  
+  let nicheInfo = "seu nicho de mercado";
+  const match = userText.match(/Nicho e Perfil fornecidos pelo usuário: "([^"]+)"/i);
+  if (match && match[1]) {
+    nicheInfo = match[1];
+  }
+
+  if (text.includes('clima') || text.includes('previsão')) {
+    return `Plano de Clima Diário (Orgânico - Meta 30 Dias) para **${nicheInfo}**.\n\nPrevisão do dia aponta clima estável. Conforme as maiores referências orgânicas de mercado, aproveite o tom de hoje para criar Stories espontâneos que sintonizem sua rotina à dor do lead, aumentando a taxa de visualização em até 12% por meio de enquetes de identificação pessoal.`;
+  }
+  if (text.includes('notícia') || text.includes('noticias')) {
+    return `Radar de Ganchos Orgânicos para **${nicheInfo}**.\n\nAproveite acontecimentos quentes do momento para estruturar postagens rápidas com alto compartilhamento. Ganchos reais baseados em tendências do dia podem elevar o alcance orgânico em até 20% se atrelados à dor oculta do seu avatar em 30 dias.`;
+  }
+  if (text.includes('reels') || text.includes('roteiro')) {
+    return `Roteiro Reels Orgânico Altamente Viralizado (Ciclo 30 Dias) para **${nicheInfo}**:\n\n- **Gancho (0-3s):** 'Em 30 dias, a maioria das pessoas que começam em ${nicheInfo} desiste por esse único erro...'\n- **Desenvolvimento (3-20s):** Imagens escuras com transições dinâmicas. Mostre que os grandes players do mercado vendem no automático usando o direct de forma discreta.\n- **CTA:** 'Comente VIRADA para que eu te envie o plano detalhado de execução diretamente no direct.'`;
+  }
+  if (text.includes('estratégia')) {
+    return `Plano Tático Orgânico de 30 Dias para Vendas em **${nicheInfo}**:\n\n- **Semana 1:** Atração focada em volume de Reels de alta retenção (3 posts/dia para aquecimento do algoritmo).\n- **Semana 2:** Filtragem de audiência e quebra de objeções nos Stories diários com caixas de perguntas.\n- **Semana 3:** Ativação de funil automatizado de direct (ManyChat) para entrega de isca digital.\n- **Semana 4:** Oferta direta com conversão no um a um e remarketing manual no privado.`;
+  }
+  if (text.includes('copy')) {
+    return `Copy de Vendas Orgânica Direta para **${nicheInfo}**:\n\n'Enquanto você tenta crescer seu perfil focado em métricas vazias, perfis silenciosos estão gerando vendas diárias focando estritamente na dor oculta do público. Não perca os próximos 30 dias do seu ano insistindo em métodos genéricos. Comente a palavra-chave abaixo e receba o acesso ao método passo a passo.'`;
+  }
+  if (text.includes('conteúdo') || text.includes('conteudo')) {
+    return `10 Ideias de Conteúdo para Viralização Orgânica Acelerada em **${nicheInfo}**:\n1. Carrossel: "O que impede você de faturar em 30 dias".\n2. Reels: Curiosidade polêmica sobre ${nicheInfo}.\n3. Story interativo de auto-inquirição.\n4. Post de checklist prático (altíssimo salvamento).\n5. Reels com estética escura abordando um segredo que os concorrentes não revelam.\n(6-10) Cronograma de vídeos curtos intercalados focados exclusivamente em saves.`;
+  }
+  if (text.includes('roi')) {
+    return `Métricas e ROI de Tráfego Orgânico em 30 Dias para **${nicheInfo}**:\n\nUtilizando benchmarks reais do mercado, projete:\n- Taxa de conversão de cliques da bio para página de vendas: de 8% a 15%.\n- Custo de Aquisição de Clientes (CAC): R$0,00 em tráfego pago.\n- Foco operacional: Otimizar o CTR do link de direct e Stories diários para elevar as vendas com zero investimento financeiro.`;
+  }
+  if (text.includes('instagram')) {
+    return `5 Legendas Orgânicas Psicológicas para **${nicheInfo}**:\n\nLegendas completas criadas com linguagem persuasiva e de fácil leitura, desenhadas para reter o usuário por mais tempo na tela do post (o que eleva a pontuação de relevância do algoritmo) e finalizadas com CTA de salvamento ou comentário específico.`;
+  }
+  if (text.includes('tendências') || text.includes('tendencias')) {
+    return `Tendências Orgânicas de Vendas Atuais para **${nicheInfo}**:\n\nA principal tendência dos maiores players hoje é a eliminação do link direto na bio para produtos de baixo ticket. O tráfego orgânico é totalmente canalizado para conversações privadas no Direct por meio de gatilhos em comentários, o que aumenta o engajamento orgânico global em até 40%.`;
+  }
+  if (text.includes('e-mail') || text.includes('email')) {
+    return `Script de Funil de Relacionamento no Direct / E-mail para **${nicheInfo}**:\n\nConfigure mensagens automáticas de acompanhamento na sua caixa de entrada com disparos táticos para todos que interagiram ou demonstraram dúvidas sobre seu ebook de R$47, aumentando as vendas em até 22% em 30 dias de forma totalmente manual ou com ManyChat.`;
+  }
+  if (text.includes('psicologia')) {
+    return `Estudo Psicológico de Conversão Orgânica para **${nicheInfo}**:\n\nAnálise comportamental aponta que o lead orgânico busca uma solução imediata e de baixo risco (R$47) para aliviar um sentimento agudo de frustração. Suas narrativas de 30 dias devem ressaltar a dor e mostrar a saída rápida por meio do seu e-book.`;
+  }
+  if (text.includes('landing page')) {
+    return `Otimização de Conversão para Tráfego Orgânico na Landing Page de **${nicheInfo}**:\n\nO público que vem do tráfego orgânico já conhece você. Evite introduções longas. Vá direto à oferta com uma headline chamativa, vídeo curto focado nos benefícios e provas sociais reais integradas para fechar a compra sem atrito.`;
+  }
+  if (text.includes('criativo org')) {
+    return `Script de Vídeo Criativo de Alta Conversão Orgânica para **${nicheInfo}**:\n\n- **Gancho (0-3s):** Mostre uma ação intrigante ou uma frase provocadora na tela.\n- **Problema (3-15s):** Aborde a dor cotidiana de forma visualmente estimulante (estética fria/dark).\n- **Resolução (15-30s):** Indique que o protocolo completo de 30 dias está disponível comentando abaixo.`;
+  }
+  if (text.includes('frases dark')) {
+    return `5 Frases Dark e Psicológicas para Posts Virais de **${nicheInfo}**:\n\n1. "O silêncio do seu perfil diz exatamente o que seu público-alvo quer ouvir."\n2. "Enquanto você gasta energia tentando parecer perfeito, eles compram de quem fala a verdade crua."\n3. "Quem tenta vender para todo mundo orgonicamente acaba invisível em menos de 30 dias."\n4. "A dor mais oculta do seu cliente é o verdadeiro motor de conversão do seu perfil."\n5. "Não grite para chamar a atenção. Sussurre a resposta que eles tentam encontrar sozinhos."`;
+  }
+  if (text.includes('plano 7 dias')) {
+    return `Plano Semanal Editorial Orgânico (Foco em Vendas em 30 Dias) para **${nicheInfo}**:\n\nCronograma balanceado de Reels focado em retenção para atração de novas visitas de perfil, complementado por blocos de 3 Stories diários nos momentos de maior pico para geração de relacionamento e fechamento no direct.`;
+  }
+  if (text.includes('funil')) {
+    return `Estrutura do Funil de Conversão Orgânica (Ciclo 30 Dias) para **${nicheInfo}**:\n\nVisualização orgânica de Reels (Topo) -> Visita qualificada de perfil e interação nos Stories (Meio) -> Envio automático de direct via ManyChat (Filtro) -> Página de conversão otimizada -> Venda direta na Kiwify (Base).`;
+  }
+
+  return "Compreendido, Senhor. Analisando dados reais de mercado para o ciclo orgânico de 30 dias... Seus sistemas recomendam focar em automações de direct para otimizar as vendas.";
+}
+
+// ── CHAT HISTORY & CLAUDE INTEGRATION ──
+const history = [];
+
+async function askJarvis(userText){
+  history.push({ role:'user', content: userText });
+  addThinking();
+
+  try {
+    let reply = "";
+
+    if (window.claude && typeof window.claude.complete === 'function') {
+      const systemPrompt = `Você é J.A.R.V.I.S., assistente de IA ultra-inteligente, analítico e fiel do usuário, baseado no personagem da Marvel/Iron Man. 
+Responda SEMPRE em português brasileiro. Seja direto, preciso e levemente formal como o J.A.R.V.I.S. do filme.
+
+Contexto Geral do Usuário: Empreendedor digital brasileiro focado em gerar vendas e monetização rápida estritamente no tráfego ORGÂNICO (sem anúncios pagos) dentro de um prazo estipulado de 30 dias, independente do nicho ou perfil de destino fornecido.
+Sua missão: Gerar planos de ação, estratégias de conteúdo, roteiros e copys 100% voltados para o crescimento orgânico acelerado e conversão orgânica direta em 30 dias. Utilize dados reais de mercado, métricas estimadas plausíveis e referências reais de grandes players de mercado.
+Evite clichês corporativos, promessas vazias ou respostas repetitivas. Entregue um plano de ação tático focado em atração, retenção e venda orgânica direta para qualquer perfil ou nicho informado.
+Seja conciso mas completo. Máximo de 350 palavras por resposta, organizadas de forma limpa e direta.`;
+
+      let fullPrompt = `${systemPrompt}\n\nHistórico da conversa:\n`;
+      const recentHistory = history.slice(-10);
+      recentHistory.forEach(h => {
+        const sender = h.role === 'user' ? 'Senhor' : 'J.A.R.V.I.S.';
+        fullPrompt += `${sender}: ${h.content}\n`;
+      });
+      fullPrompt += `J.A.R.V.I.S.:`;
+
+      reply = await window.claude.complete(fullPrompt);
+    } else {
+      reply = await mockJarvisResponse(userText);
+    }
+
+    if (!reply) throw new Error("A IA retornou uma resposta em branco.");
+
+    history.push({ role:'assistant', content: reply });
+    removeThinking();
+    addMsg('jarvis', reply);
+
+    cmdCount++;
+    document.getElementById('sCount').textContent = cmdCount;
+
+    if(voiceActive){ try{ recognition && recognition.stop(); }catch(ex){} }
+    speakText(reply, ()=>{
+      if(voiceActive) setTimeout(()=>startListening(), 400);
+    });
+
+  } catch(err){
+    removeThinking();
+    showAlert('Falha operacional: ' + err.message);
+    history.pop();
+  }
+}
+
+// ── TTS — VOZ GRAVE MASCULINA ──
+let isSpeaking = false;
+let voicesReady = false;
+let cachedVoice = null;
+
+function pickBestVoice(){
+  if(cachedVoice) return cachedVoice;
+  const voices = window.speechSynthesis.getVoices();
+  if(!voices.length) return null;
+
+  const priorities = [
+    v => v.lang === 'pt-BR' && /daniel|marcos|lucas|masc|male/i.test(v.name),
+    v => v.lang === 'pt-BR',
+    v => v.lang.startsWith('pt'),
+    v => /daniel|jorge|diego/i.test(v.name),
+    v => /uk|british|en-gb/i.test(v.lang+v.name),
+    v => v.lang.startsWith('en') && /male/i.test(v.name),
+    v => v.lang.startsWith('en'),
+  ];
+
+  for(const fn of priorities){
+    const found = voices.find(fn);
+    if(found){ cachedVoice = found; return found; }
+  }
+  cachedVoice = voices[0];
+  return cachedVoice;
+}
+
+if('speechSynthesis' in window){
+  window.speechSynthesis.onvoiceschanged = ()=>{
+    voicesReady = true;
+    cachedVoice = null;
+    pickBestVoice();
+  };
+}
+
+function splitSentences(text, maxLen=180){
+  const chunks = [];
+  const sentences = text.match(/[^.!?\n]+[.!?\n]*/g) || [text];
+  let current = '';
+  for(const s of sentences){
+    if((current+s).length > maxLen && current){
+      chunks.push(current.trim());
+      current = s;
+    } else {
+      current += s;
+    }
+  }
+  if(current.trim()) chunks.push(current.trim());
+  return chunks;
+}
+
+function speakText(text, onDone){
+  if(!('speechSynthesis' in window)){ onDone && onDone(); return; }
+
+  window.speechSynthesis.cancel();
+  isSpeaking = true;
+
+  document.getElementById('vlabel').textContent = 'J.A.R.V.I.S. FALANDO...';
+  document.getElementById('vbtn').style.borderColor = 'var(--gold)';
+  document.getElementById('vbtn').style.boxShadow = '0 0 36px rgba(255,215,0,.5), inset 0 0 20px rgba(255,215,0,.08)';
+
+  const wbs = document.querySelectorAll('.wb');
+  wbs.forEach(wb => wb.style.background = 'var(--gold)');
+
+  const chunks = splitSentences(text.replace(/\*/g,'').replace(/#/g,''), 180);
+  let idx = 0;
+
+  function speakNext(){
+    if(idx >= chunks.length){
+      finishSpeaking();
+      onDone && onDone();
+      return;
+    }
+    const u = new SpeechSynthesisUtterance(chunks[idx++]);
+    u.lang = 'pt-BR';
+    u.rate = 0.88;
+    u.pitch = 0.55;
+    u.volume = 1.0;
+
+    const voice = pickBestVoice();
+    if(voice) u.voice = voice;
+
+    u.onend = speakNext;
+    u.onerror = ()=>{ speakNext(); };
+    window.speechSynthesis.speak(u);
+  }
+
+  speakNext();
+}
+
+function finishSpeaking(){
+  isSpeaking = false;
+  document.getElementById('vbtn').style.borderColor = '';
+  document.getElementById('vbtn').style.boxShadow = '';
+  const wbs = document.querySelectorAll('.wb');
+  wbs.forEach(wb => wb.style.background = 'var(--cyan)');
+  if(voiceActive){
+    document.getElementById('vlabel').textContent = 'OUVINDO...';
+  }
+}
+
+// ── INPUT & COMMAND CONTROLLER (STATE MACHINE) ──
+let pendingAction = null;
+
+function triggerCommand(commandName, basePrompt) {
+  unlockTTS();
+  pendingAction = { name: commandName, basePrompt: basePrompt };
+  
+  const textQuestion = `Entendido, Senhor. Para qual nicho e perfil orgânico de 30 dias deseja que eu elabore o plano de ação de **${commandName}**? Por favor, digite ou fale o nome do nicho e o perfil de destino (ex: *Relacionamentos, @perfil* ou *Estética, @perfil*).`;
+  
+  addMsg('jarvis', textQuestion);
+  speakText(textQuestion);
+  
+  document.getElementById('inp').placeholder = `Digite o nicho e perfil para ${commandName}...`;
+  document.getElementById('inp').focus();
+}
+
+function handleUserInput(text) {
+  addMsg('user', text);
+  
+  if (pendingAction) {
+    const finalPrompt = `[Contexto do Projeto: Nicho e Perfil fornecidos pelo usuário: "${text}"]. 
+Utilizando este contexto específico focado estritamente em crescimento acelerado e vendas no ORGÂNICO em um ciclo tático de 30 dias, elabore um plano de ação estratégico detalhado, totalmente prático e focado em conversão e vendas para o seguinte objetivo: "${pendingAction.basePrompt}". 
+Evite respostas clichês, genéricas ou estruturas repetitivas. Baseie-se nas abordagens reais mais consolidadas e validadas por grandes players e referências deste segmento de mercado. Apresente os passos concretos e as métricas orgânicas estimadas de execução diária e semanal.`;
+    
+    pendingAction = null;
+    document.getElementById('inp').placeholder = "Digite seu comando, Senhor...";
+    askJarvis(finalPrompt);
+  } else {
+    askJarvis(text);
+  }
+}
+
+function sendMsg(){
+  unlockTTS();
+  const inp = document.getElementById('inp');
+  const text = inp.value.trim();
+  if(!text) return;
+  inp.value='';
+  document.getElementById('sMode').textContent='TEXT';
+  handleUserInput(text);
+}
+
+// ── INTELLIGENT SPEECH RECOGNITION ──
+let recognition = null;
+let voiceActive = false;
+let restartTimer = null;
+
+function setupRecognition(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR) return null;
+
+  const r = new SR();
+  r.lang = 'pt-BR';
+  r.continuous = false;
+  r.interimResults = true;
+
+  r.onstart = ()=>{
+    voiceActive = true;
+    document.getElementById('vbtn').classList.add('on');
+    document.getElementById('vlabel').textContent = 'OUVINDO...';
+    document.getElementById('wave').classList.add('show');
+    document.getElementById('liveBox').classList.add('show');
+    document.getElementById('sMode').textContent = 'VOZ';
+  };
+
+  r.onresult = (e)=>{
+    let interim='', final='';
+    for(let i=e.resultIndex; i<e.results.length; i++){
+      const t = e.results[i][0].transcript;
+      if(e.results[i].isFinal) final+=t;
+      else interim+=t;
+    }
+    document.getElementById('liveBox').textContent = interim || final || 'Ouvindo...';
+
+    if(final.trim()){
+      try{ recognition.stop(); }catch(ex){}
+      document.getElementById('liveBox').textContent = '✓ ' + final.trim();
+      handleUserInput(final.trim());
+    }
+  };
+
+  r.onerror = (e)=>{
+    if(e.error === 'not-allowed' || e.error === 'denied'){
+      document.getElementById('micBanner').classList.add('show');
+      voiceActive = false;
+      document.getElementById('vbtn').classList.remove('on');
+      document.getElementById('vlabel').textContent = 'MICROFONE NEGADO';
+    } else if(e.error === 'no-speech'){
+      if(voiceActive && !isSpeaking) scheduleRestart();
+    }
+  };
+
+  r.onend = ()=>{
+    document.getElementById('vbtn').classList.remove('on');
+    if(voiceActive && !isSpeaking) scheduleRestart();
+  };
+
+  return r;
+}
+
+function scheduleRestart(){
+  clearTimeout(restartTimer);
+  restartTimer = setTimeout(()=>{ 
+    if(voiceActive && !isSpeaking) startListening(); 
+  }, 400);
+}
+
+function startListening(){
+  if(!recognition) recognition = setupRecognition();
+  if(!recognition){
+    document.getElementById('vlabel').textContent = 'VOZ NÃO SUPORTADA';
+    return;
+  }
+  try{ recognition.start(); }catch(ex){}
+}
+
+function stopListening(){
+  voiceActive = false;
+  clearTimeout(restartTimer);
+  try{ recognition.stop(); }catch(ex){}
+  document.getElementById('vbtn').classList.remove('on');
+  document.getElementById('vlabel').textContent = 'TOQUE PARA FALAR';
+  document.getElementById('wave').classList.remove('show');
+  document.getElementById('liveBox').classList.remove('show');
+  document.getElementById('sMode').textContent = 'TEXT';
+}
+
+function toggleVoice(){
+  unlockTTS();
+  if(voiceActive) stopListening();
+  else { voiceActive=true; startListening(); }
+}
+
+// ── AUTO-START MICROPHONE ──
+window.addEventListener('load', ()=>{
+  voiceActive = true;
+  setTimeout(()=>{
+    recognition = setupRecognition();
+    if(recognition){
+      try{
+        recognition.start();
+        document.getElementById('vlabel').textContent = 'OUVINDO...';
+        document.getElementById('wave').classList.add('show');
+        document.getElementById('liveBox').classList.add('show');
+        document.getElementById('liveBox').textContent = 'Aguardando sua voz...';
+      } catch(ex){
+        voiceActive = false;
+        document.getElementById('vlabel').textContent = 'TOQUE PARA ATIVAR';
+        document.getElementById('wave').classList.remove('show');
+      }
+    } else {
+      document.getElementById('vlabel').textContent = 'VOZ NÃO SUPORTADA';
+      document.getElementById('wave').classList.remove('show');
+    }
+  }, 1000);
+});
+</script>
+</body>
+</html>
