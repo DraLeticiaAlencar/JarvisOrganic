@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>J.A.R.V.I.S. — Silent Protocol AI</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<!-- Integração do Puter.js para Inteligência Real com Zero CORS no Navegador -->
+<script src="https://js.puter.com/v2/"></script>
 <style>
 :root {
   --cyan: #00d4ff;
@@ -587,7 +589,7 @@ async function mockJarvisResponse(userText) {
     return `5 Frases Dark e Psicológicas para Posts Virais de **${nicheInfo}**:\n\n1. "O silêncio do seu perfil diz exatamente o que seu público-alvo quer ouvir."\n2. "Enquanto você gasta energia tentando parecer perfeito, eles compram de quem fala a verdade crua."\n3. "Quem tenta vender para todo mundo orgonicamente acaba invisível em menos de 30 dias."\n4. "A dor mais oculta do seu cliente é o verdadeiro motor de conversão do seu perfil."\n5. "Não grite para chamar a atenção. Sussurre a resposta que eles tentam encontrar sozinhos."`;
   }
   if (text.includes('plano 7 dias')) {
-    return `Plano Semanal Editorial Orgânico (Foco em Vendas em 30 Dias) para **${nicheInfo}**:\n\nCronograma balanceado de Reels focado em retenção para atração de novas visitas de perfil, complementado por blocos de 3 Stories diários nos momentos de maior pico para geração de relacionamento e fechamento no direct.`;
+    return `Cronograma Editorial de 7 Dias Orgânicos para **${nicheInfo}**:\n\nOrganizado com distribuição alternada entre Reels de alto gancho (para atração), Carrosséis técnicos (para gerar salvamentos e autoridade) e Stories diários interativos de quebra de objeções.`;
   }
   if (text.includes('funil')) {
     return `Estrutura do Funil de Conversão Orgânica (Ciclo 30 Dias) para **${nicheInfo}**:\n\nVisualização orgânica de Reels (Topo) -> Visita qualificada de perfil e interação nos Stories (Meio) -> Envio automático de direct via ManyChat (Filtro) -> Página de conversão otimizada -> Venda direta na Kiwify (Base).`;
@@ -606,13 +608,35 @@ async function askJarvis(userText){
   try {
     let reply = "";
 
-    if (window.claude && typeof window.claude.complete === 'function') {
+    // Método Principal: Conexão via Puter.js (Zero CORS, Inteligente e Funcional Localmente)
+    if (typeof puter !== 'undefined' && puter.ai) {
       const systemPrompt = `Você é J.A.R.V.I.S., assistente de IA ultra-inteligente, analítico e fiel do usuário, baseado no personagem da Marvel/Iron Man. 
 Responda SEMPRE em português brasileiro. Seja direto, preciso e levemente formal como o J.A.R.V.I.S. do filme.
 
-Contexto Geral do Usuário: Empreendedor digital brasileiro focado em gerar vendas e monetização rápida estritamente no tráfego ORGÂNICO (sem anúncios pagos) dentro de um prazo estipulado de 30 dias, independente do nicho ou perfil de destino fornecido.
+Contexto Geral do Usuário: Empreendedor digital brasileiro focado em gerar faturamento acelerado e vendas estritamente no tráfego ORGÂNICO (sem anúncios pagos) dentro de um prazo estipulado de 30 dias, independente do nicho ou perfil de destino fornecido.
 Sua missão: Gerar planos de ação, estratégias de conteúdo, roteiros e copys 100% voltados para o crescimento orgânico acelerado e conversão orgânica direta em 30 dias. Utilize dados reais de mercado, métricas estimadas plausíveis e referências reais de grandes players de mercado.
-Evite clichês corporativos, promessas vazias ou respostas repetitivas. Entregue um plano de ação tático focado em atração, retenção e venda orgânica direta para qualquer perfil ou nicho informado.
+Evite clichês corporativos, promessas vazias ou respostas repetitivas. Entregue um plano de ação tático focado em atração, retenção e venda orgânica direta para qualquer perfil ou nicho informado. Quando o usuário fizer perguntas livres e gerais, responda exatamente ao que ele perguntou de forma direta, com clareza e alta inteligência analítica.
+Seja conciso mas completo. Máximo de 350 palavras por resposta, organizadas de forma limpa e direta.`;
+
+      let fullPrompt = `${systemPrompt}\n\nHistórico da conversa:\n`;
+      const recentHistory = history.slice(-8);
+      recentHistory.forEach(h => {
+        const sender = h.role === 'user' ? 'Senhor' : 'J.A.R.V.I.S.';
+        fullPrompt += `${sender}: ${h.content}\n`;
+      });
+      fullPrompt += `J.A.R.V.I.S.:`;
+
+      // Chamada real à inteligência artificial integrada
+      reply = await puter.ai.chat(fullPrompt);
+    } 
+    // Fallback caso o script externo do Puter.js venha a falhar por falta de internet
+    else if (window.claude && typeof window.claude.complete === 'function') {
+      const systemPrompt = `Você é J.A.R.V.I.S., assistente de IA ultra-inteligente, analítico e fiel do usuário, baseado no personagem da Marvel/Iron Man. 
+Responda SEMPRE em português brasileiro. Seja direto, preciso e levemente formal como o J.A.R.V.I.S. do filme.
+
+Contexto Geral do Usuário: Empreendedor digital brasileiro focado em gerar faturamento acelerado e vendas estritamente no tráfego ORGÂNICO (sem anúncios pagos) dentro de um prazo estipulado de 30 dias, independente do nicho ou perfil de destino fornecido.
+Sua missão: Gerar planos de ação, estratégias de conteúdo, roteiros e copys 100% voltados para o crescimento orgânico acelerado e conversão orgânica direta em 30 dias. Utilize dados reais de mercado, métricas estimadas plausíveis e referências reais de grandes players de mercado.
+Evite clichês corporativos, promessas vazias ou respostas repetitivas. Entregue um plano de ação tático focado em atração, retenção e venda orgânica direta para qualquer perfil ou nicho informado. Quando o usuário fizer perguntas livres e gerais, responda exatamente ao que ele perguntou de forma direta, com clareza e alta inteligência analítica.
 Seja conciso mas completo. Máximo de 350 palavras por resposta, organizadas de forma limpa e direta.`;
 
       let fullPrompt = `${systemPrompt}\n\nHistórico da conversa:\n`;
@@ -625,6 +649,7 @@ Seja conciso mas completo. Máximo de 350 palavras por resposta, organizadas de 
 
       reply = await window.claude.complete(fullPrompt);
     } else {
+      // Fallback estático (offline) se nada acima carregar
       reply = await mockJarvisResponse(userText);
     }
 
